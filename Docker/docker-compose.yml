@@ -1,0 +1,11 @@
+version: '2'
+services:
+  supervisor:
+    build:
+      context: ..
+      dockerfile: Docker/Dockerfile-supervisor
+    volumes:
+      - ..:/usr/src/app
+
+  rabbitmq:
+    image: rabbitmq:3.6.5-management
