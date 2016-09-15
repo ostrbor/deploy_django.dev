@@ -1,0 +1,39 @@
+from pathlib import Path
+import json, os
+
+# FILESYSTEM
+# dir with configs for deployment
+DEPLOY_DIR = 'Deploy'
+# path where 'fab' command is invoked, must be the same as path of fabfile.py
+PROJECT_PATH = Path.cwd()
+# name of dir will be name of venv, django project, remote repo
+PROJECT_NAME = PROJECT_PATH.name
+VENV_PATH = Path(os.getenv('WORKON_HOME')).joinpath(PROJECT_NAME)
+SETTINGS_PY = PROJECT_PATH / PROJECT_NAME / 'settings.py'
+# content of this file to paste into django settings.py
+SETTINGS_TXT = PROJECT_PATH / DEPLOY_DIR / 'db_settings.txt'
+# line to start cutting in default django setting.py
+CUT_FROM = 'DATABASES = {\n'
+CUT_TO = '\n'
+
+# GITHUB
+GITHUB_USER = ""
+GITHUB_TOKEN = ""
+GITHUB_API_URL = "https://api.github.com/user/repos?access_token=%s" % GITHUB_TOKEN
+GITHUB_PUSH_CMD = "git remote add origin git@github.com:%s/%s.git "\
+                  "&& git push -u origin master" % (GITHUB_USER, GITHUB_TOKEN)
+GITHUB_DATA_JSON = json.dumps({"name": PROJECT_NAME})
+
+# VENV_COMMANDS
+# source each time because each cmd run in new shell
+# no need to deactivate
+SOURCE_VENV = 'source /usr/local/bin/virtualenvwrapper.sh && '
+MK_VENV = SOURCE_VENV + 'mkvirtualenv %s' % PROJECT_NAME
+SET_VENVPROJECT = SOURCE_VENV + 'setvirtualenvproject %s %s' % (VENV_PATH, PROJECT_PATH)
+WORKON_VENV = SOURCE_VENV + 'workon %s && ' % PROJECT_NAME
+
+# OTHER COMMANDS
+PIP_INSTALL_REQ = WORKON_VENV + 'pip install -r requirements.txt'
+CHOWN_CMD = 'sudo chown -R $USER:$USER . '
+DJANGO_STARTPROJECT = WORKON_VENV + 'django-admin.py startproject %s .' % PROJECT_NAME
+CD = 'cd %s && ' % DEPLOY_DIR
